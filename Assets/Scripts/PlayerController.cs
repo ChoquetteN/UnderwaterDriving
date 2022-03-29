@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
         _controllerMaping.Add(KeyCode.LeftArrow, new TurnSubLeft(SubmarinePlayer));
         _controllerMaping.Add(KeyCode.UpArrow, new SubMoveUp(SubmarinePlayer));
         _controllerMaping.Add(KeyCode.DownArrow, new SubMoveDown(SubmarinePlayer));
+        _controllerMaping.Add(KeyCode.Escape, new QuitGame());
         } 
 
         private void Update() 

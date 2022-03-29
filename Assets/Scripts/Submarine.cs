@@ -5,7 +5,6 @@ using UnityEngine;
 public class Submarine : MonoBehaviour
 {
 
-
     float maxSpeed = 5f;
     float timeFromZeroToMax = 1.5f;
     float timeFromMaxToZero = 3f;
@@ -20,8 +19,33 @@ public class Submarine : MonoBehaviour
     float upVelocity; 
     float currentTurn;
 
+    float timerTillPing;
+    const float maxTimeTillPing = 5;
+    const float midTimeTillPing = 4;
+    const float closeTimeTillPing = 3;
+    const float veryCloseTimeTillPing = 2;
+    const float ontopTimeTillPing = 1f;
 
-    Rigidbody rigidbody; 
+    
+    Interact interactable;
+
+    [SerializeField]
+    ChestInteract chest;
+
+    [SerializeField]
+    ShipInteractScript ship;
+
+
+    Rigidbody rigidbody;
+
+    Vector3 respawnPoint;
+
+
+
+    enum distances
+    { ONTOPOP= 30 ,VERYCLOSE = 50 ,CLOSE = 75 ,MID = 100 ,FAR = 101};
+
+    distances curDistance = distances.FAR;
 
     private void Start()
     {
@@ -31,7 +55,9 @@ public class Submarine : MonoBehaviour
         breakRatePerSec = -maxSpeed / timeBreakToZero;
         forwardVelocity = 0;
         currentTurn = 0;
-
+        respawnPoint = this.transform.position;
+        targetChest();
+        
     }
 
 
@@ -41,7 +67,51 @@ public class Submarine : MonoBehaviour
         rigidbody.velocity = (transform.forward * forwardVelocity) + (transform.right * rightVelocity) + (transform.up * upVelocity);
         
         currentTurn = 0;
+       
+        if((timerTillPing -= Time.deltaTime) <= 0)
+        {
+            SoundManager.Instance.AddCommand("Ping");
+            LookForChestDistance();          
+        }
+        
+    }
 
+    private void LookForChestDistance()
+    {
+        float distanceToChest = Vector3.Distance(this.transform.position, interactable.getPosition());
+        Debug.Log(distanceToChest);
+
+
+        if (distanceToChest <= (float)distances.ONTOPOP)
+        {
+          timerTillPing = ontopTimeTillPing;
+
+            return;
+        }
+
+        if (distanceToChest <= (float)distances.VERYCLOSE)
+        {
+            timerTillPing = veryCloseTimeTillPing;
+
+            return;
+        }
+
+        if (distanceToChest <= (float)distances.CLOSE)
+        {
+                timerTillPing = closeTimeTillPing;
+
+            return;
+        }
+
+        if (distanceToChest <= (float)distances.MID)
+        {
+                timerTillPing = midTimeTillPing;
+
+            return;
+        }
+
+        timerTillPing = maxTimeTillPing;
+     
     }
   
     public void noInput()
@@ -116,6 +186,23 @@ public class Submarine : MonoBehaviour
     void RotateSub(int LeftOrRight)
     {
         currentTurn = turnAnglePerSecond * Time.deltaTime * LeftOrRight;
+    }
+
+    public void resetLocation()
+    {
+        this.transform.position = respawnPoint;
+    }
+
+    public void targetShip()
+    {
+        interactable = ship;
+        Debug.Log("Targeting Ship");
+    }
+
+    public void targetChest()
+    {
+        interactable = chest;
+        Debug.Log("Targeting Chest");
     }
 
 }
